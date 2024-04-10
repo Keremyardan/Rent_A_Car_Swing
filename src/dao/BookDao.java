@@ -13,19 +13,21 @@ public class BookDao {
     private Connection con;
     private final CarDao carDao;
 
-
-    //private final CarDao carDao = new CarDao();
-
+    //Db bağlantısı
     public BookDao() {
         this.con = Db.getInstance();
         this.carDao = new CarDao();
 
     }
+
+    //Total olarak ne var ne yok bulur
     public ArrayList<Book> findAll() {
         String sql = "SELECT * FROM public.book ORDER BY book_id ASC";
         return this.selectByQuery(sql);
 
     }
+
+    //Book kısmından id'ye uygun tek bir rezervasyonu almak için kullanılır.
     public Book getById(int id) {
         Book obj = null;
         String query = "SELECT * FROM public.book WHERE book_id = ?";
@@ -45,8 +47,10 @@ public class BookDao {
         return obj;
 
     }
+
+    // Book kısmından rezervasyonları almak için kullanılır
     public ArrayList<Book> selectByQuery(String query) {
-        // System.out.println(query);
+
         ArrayList<Book> books = new ArrayList<>();
 
         try {
@@ -61,6 +65,23 @@ public class BookDao {
         return books;
     }
 
+    // bildiğin delete
+    public boolean delete(int id) {
+        String query = "DELETE FROM public.book WHERE book_id =?";
+        try {
+            PreparedStatement pr = con.prepareStatement(query);
+            pr.setInt(1, id);
+            // Index 0'dan başlıyor. Bu da demektir ki, en az bir tane satırın işlem görmesi gerekli. Yoksa false döndürüyor.
+            return pr.executeUpdate() != -1;
+
+        } catch (SQLException throwables) {
+            throwables.printStackTrace();
+        }
+        return true;
+
+    }
+
+    //Save kısımları için ? işareti yerlerine nelerin geleceği belirlenir.
     public boolean save(Book book) {
         String query = "INSERT INTO public.book " +
                 "(" +
@@ -94,19 +115,9 @@ public class BookDao {
         }
         return true;
     }
-    public boolean delete(int id) {
-        String query = "DELETE FROM public.book WHERE book_id =?";
-        try {
-            PreparedStatement pr = con.prepareStatement(query);
-            pr.setInt(1, id);
-            return pr.executeUpdate() != -1;
 
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
-        }
-        return true;
 
-    }
+    //Resultsetten gelen verileri eşler / günceller. Yani book nesnesi veritabanından alınan verilerle doldurulmuş olur.
     public Book match(ResultSet rs) throws SQLException {
         Book book = new Book();
         book.setId(rs.getInt("book_id"));
